@@ -1,5 +1,5 @@
 import { supabase } from "../../lib/supabase"
-import SpreadsheetTable from "./SpreadsheetTable";
+import SpreadsheetTable from "./components/SpreadsheetTable";
 
 
 export default function Page() {
