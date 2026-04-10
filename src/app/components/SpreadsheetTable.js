@@ -48,6 +48,10 @@ export default function SpreadsheetTable({ spreadsheetdataName, spreadsheetColum
                         readOnly
                       />
                     </td>
+                    {/* SpreadSheetID */}
+                    <td className="px-4 py-2 text-center ">
+                      {row.spreadsheetdataID}
+                    </td>
 
                     {/* Dynamic columns */}
                     {spreadsheetColumns.map((col) => (

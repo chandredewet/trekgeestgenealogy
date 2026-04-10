@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabase";
 import SpreadsheetTable from "../components/SpreadsheetTable";
 import Loader from "../components/Loader";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function SpreadsheetsPage() {
   const [rows, setRows] = useState([]);
@@ -63,10 +65,21 @@ export default function SpreadsheetsPage() {
 
   <div className="p-6">
     
-    {/* HEADER */}
-    <h1 className="--font-google-sans text-5xl">spreadsheets</h1>
-
-    <div className="flex flex-col flex-1 items-end justify-end bg-white font-sans dark:bg-black">
+    <div className="flex items-start">
+      <div className="flex items-start">
+          {/* HEADER */}
+            <Link href="/"><Image
+                      src="/hatlogo.png"
+                      alt="Trekgeest logo"
+                      width={150}
+                      height={150}
+                       className="object-contain -mr-6 -mt-4"
+                      priority
+                    /> </Link>
+          <h1 className="--font-google-sans text-5xl">spreadsheets</h1>
+     </div>
+    <div className="flex flex-col flex-1  justify-top items-end bg-white font-sans dark:bg-black">
+     
       {/* UPLOAD BUTTON (placeholder) */}
       <div className="mb-4">
         <button className="bg-[#c06a4d] text-white px-4 py-2 rounded-md">
@@ -80,7 +93,7 @@ export default function SpreadsheetsPage() {
         </select>
       </div>
     </div>
-
+</div>
   <div className="flex flex-col flex-1 items-center justify-center px-10 py-10  bg-white font-sans dark:bg-black">
     {!hasSpreadsheetDataLoaded ? (    
        <Loader />
