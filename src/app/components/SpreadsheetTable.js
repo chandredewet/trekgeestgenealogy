@@ -6,7 +6,7 @@ export default function SpreadsheetTable({ spreadsheetdataName, spreadsheetColum
   
    return (
      <div className="flex flex-1 w-full max-w-none flex-col items-center dark:bg-black sm:items-start">
-        <h2 className="--font-google-sans text-3xl items-end">{spreadsheetdataName}</h2>
+        <h2 className="--font-inter text-3xl items-end">{spreadsheetdataName}</h2>
         {/* TABLE */}
         <div className="w-full overflow-hidden border border-gray-200 rounded-2xl shadow-sm">          
           <div className="max-h-[500px] overflow-auto scroll-smooth ">    

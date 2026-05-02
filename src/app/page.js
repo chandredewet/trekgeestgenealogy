@@ -15,23 +15,31 @@ export default function Page() {
           className="object-contain"
           priority
         />
-        <h1 className="--font-google-sans text-5xl leading-tight">
+        <h1 className="--font-inter text-5xl leading-tight">
           trekgeest genealogy
         </h1>
       </div>
      
-     <p className="--font-google-sans flex flex-col items-center text-3xl "> Tools and Information Mapping of Gordonia Basters</p>
+     <p className="--font-inter flex flex-col items-center text-3xl "> Tools and Information Mapping of Gordonia Basters</p>
 
      <ul className="max-w-md space-y-3 text-body list-inside text-center">
-             
-             <li className="flex items-center py-8 justify-center gap-4">           
-              <Link href="/spreadsheets">
-  <button className="bg-[#c06a4d] text-white px-6 py-3 rounded-md">
-    Go to Spreadsheets
-  </button>
-</Link>
-             </li>
-           </ul> 
+        <li className="flex items-center py-8 justify-center gap-4">           
+          <Link href="/spreadsheets">
+            <button className="bg-[#c06a4d] text-white px-6 py-3 rounded-md">
+              Go to Spreadsheets
+            </button>
+          </Link>
+        </li>
+      </ul> 
+      <ul className="max-w-md space-y-3 text-body list-inside text-center">
+        <li className="flex items-center py-8 justify-center gap-4">           
+          <Link href="/spreadsheets">
+            <button className="bg-[#c06a4d] text-white px-6 py-3 rounded-md">
+              Go to People Database
+            </button>
+          </Link>
+        </li>
+      </ul> 
 
     </div>
   );

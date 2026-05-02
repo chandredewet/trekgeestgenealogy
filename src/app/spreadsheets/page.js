@@ -15,36 +15,46 @@ export default function SpreadsheetsPage() {
 
   // 🚀 Fetch your CURRENT data (unchanged)
   useEffect(() => {
-    const fetchData = async () => {
-      const { data, error } = await supabase
-        .from("spreadsheetdata") // your current table
-        .select("*")
-        .eq("spreadsheetdataName", spreadsheetdataName);
 
+    const fetchData = async () => {
+
+      const { data, error } = await supabase
+        .from("spreadsheet_row")
+        .select(`
+          *,
+          spreadsheet (
+            spreadsheet_name
+          )
+        `)
+        .eq("spreadsheet.spreadsheet_name", spreadsheetdataName);
 
       if (error) {
-        console.error("Supabase error:",error);
-        setHasSpreadsheetDataLoaded(true); // still stop loader
+        console.error("Supabase error:", error);
+        setHasSpreadsheetDataLoaded(true);
         return;
       }
 
+      console.log("Joined data:", data);
+
       const mappedRows = data.map(r => ({
-        ...r.spreadsheetdataData,
-        spreadsheetdataID: r.spreadsheetdataID,
-        spreadsheetdataProcessed: r.spreadsheetdataProcessed
+        ...r.spreadsheet_row_data,
+        spreadsheetdataID: r.spreadsheet_row_id,
+        spreadsheetdataProcessed: r.spreadsheet_row_processed
       }));
 
-      console.log(mappedRows)
-
       setRows(mappedRows);
+      
+      if (mappedRows.length > 0) {
 
-      // 🧠 Extract columns from your JSON
-      const cols =
-        data.length > 0 && data[0].spreadsheetdataData
-          ? Object.keys(data[0].spreadsheetdataData)
-          : [];
+        // 🧠 Extract columns from your JSON
+        const cols =
+          data.length > 0 && data[0].spreadsheet_row_data
+            ? Object.keys(data[0].spreadsheet_row_data)
+            : [];
 
-      setColumns(cols);
+        setColumns(Object.keys(mappedRows[0]));
+      }
+      
       setHasSpreadsheetDataLoaded(true);
     };
 
@@ -73,12 +83,13 @@ export default function SpreadsheetsPage() {
                       alt="Trekgeest logo"
                       width={150}
                       height={150}
-                       className="object-contain -mr-6 -mt-4"
+                      style={{ height: "auto" }}
+                      className="object-contain -mr-6 -mt-4"
                       priority
                     /> </Link>
-          <h1 className="--font-google-sans text-5xl">spreadsheets</h1>
+          <h1 className="--font-inter text-5xl">spreadsheets</h1>
      </div>
-    <div className="flex flex-col flex-1  justify-top items-end bg-white font-sans dark:bg-black">
+    <div className="flex flex-col flex-1  justify-top items-end bg-white font-inter dark:bg-black">
      
       {/* UPLOAD BUTTON (placeholder) */}
       <div className="mb-4">
@@ -94,7 +105,7 @@ export default function SpreadsheetsPage() {
       </div>
     </div>
 </div>
-  <div className="flex flex-col flex-1 items-center justify-center px-10 py-10  bg-white font-sans dark:bg-black">
+  <div className="flex flex-col flex-1 items-center justify-center py-10 pl-10 pr-0  bg-white font-inter dark:bg-black">
     {!hasSpreadsheetDataLoaded ? (    
        <Loader />
       ) : (         
