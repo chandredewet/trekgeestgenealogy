@@ -39,14 +39,29 @@ export default function SpreadsheetTable({ spreadsheetdataName, spreadsheetColum
               <tbody>
                 {spreadsheetRows.map((row, idx) => (
                   <tr key={idx} className="border-t hover:bg-gray-50 transition align-center">
-
+                    
                     {/* Processed */}
                     <td className="px-4 py-2 text-center ">
-                      <input
-                        type="checkbox"
-                        checked={row.spreadsheetdataProcessed || false}
-                        readOnly
-                      />
+                      <button
+                        disabled
+                        title={
+                          row.spreadsheetdataProcessed
+                            ? "Already added to People Database"
+                            : "Add to People Database"
+                        }
+                        className={`
+                          mx-auto
+                          w-8 h-8 rounded-full border flex items-center justify-center
+                          transition
+                          ${
+                            row.spreadsheetdataProcessed
+                              ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                              : "bg-gray-100 text-gray-400 cursor-not-allowed hover:bg-gray-200"
+                          }
+                        `}
+                      >
+                        {row.spreadsheetdataProcessed ? "✓" : "+"}
+                      </button>
                     </td>
                     {/* SpreadSheetID */}
                     <td className="px-4 py-2 text-center ">
