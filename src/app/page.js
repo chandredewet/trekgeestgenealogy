@@ -1,5 +1,4 @@
 import { supabase } from "../../lib/supabase"
-import SpreadsheetTable from "./components/SpreadsheetTable";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -26,12 +25,17 @@ export default function Page() {
               <button className="bg-[#c06a4d] text-white px-6 py-3 rounded-md">
                 Go to Spreadsheets
               </button>
-            </Link>
-          <Link href="/spreadsheets">
+          </Link>
+          <Link href="/peopledatabase">
               <button className="bg-[#c06a4d] text-white px-6 py-3 rounded-md">
                 Go to People Database
               </button>
-            </Link>                   
+          </Link>
+          <Link href="/exploredna">
+              <button className="bg-[#c06a4d] text-white px-6 py-3 rounded-md">
+                Explore DNA
+              </button>
+          </Link>                   
       </div>
     </div>
   );
