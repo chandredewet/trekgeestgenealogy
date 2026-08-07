@@ -3,7 +3,15 @@ import { useState, useEffect } from "react";
 import { supabase } from "../../../lib/supabase"; // adjust path
 
 export default function SpreadsheetTable({ spreadsheetdataName, spreadsheetColumns, spreadsheetRows,   handleAddToPeopleDB }) {
-  
+  const totalRows = spreadsheetRows.length;
+
+const processedRows = spreadsheetRows.filter(
+  row => row.spreadsheetRowProcessed
+).length;
+
+const percentage = totalRows
+  ? Math.round((processedRows / totalRows) * 100)
+  : 0;
   
 
    return (
@@ -16,19 +24,13 @@ export default function SpreadsheetTable({ spreadsheetdataName, spreadsheetColum
       <div className="flex justify-between mb-2">
         <span>
           Processed: {
-            spreadsheetRows.filter(
-              row => row.spreadsheetRowProcessed
-            ).length
-          } / {spreadsheetRows.length}
+            processedRows
+          } / {totalRows}
         </span>
 
         <span>
           {
-            Math.round(
-              (spreadsheetRows.filter(
-                row => row.spreadsheetRowProcessed
-              ).length / spreadsheetRows.length) * 100
-            )
+             percentage
           }%
         </span>
       </div>
