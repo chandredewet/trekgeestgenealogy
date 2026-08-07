@@ -90,6 +90,34 @@ export default function SpreadsheetsPage() {
     setHasSpreadsheetDataLoaded(true);
   };
 
+  async function handleAddToPeopleDB(row) {
+    console.log("Adding row:", row);
+    console.log("Row ID:", row.spreadsheetRowID);
+    console.log("Object Keys", Object.keys(row));
+
+  const { data, error } = await supabase
+    .from("spreadsheet_row")
+    .update({
+      spreadsheet_row_processed: true
+    })
+    .eq(
+      "spreadsheet_row_id",
+      row.spreadsheetRowID
+    )
+    .select();
+
+    console.log("Updated row:", data);
+    console.log("Update error:", error);
+
+    if (error) {
+      console.log(error);
+      return;
+    }
+
+    await fetchSpreadsheetRow();
+
+  }
+
   // 🚀 Fetch Spreadsheet Name and ID
   useEffect(() => {
     const loadSpreadsheet = async () => {
@@ -404,7 +432,8 @@ export default function SpreadsheetsPage() {
       ) : (                
           <SpreadsheetTable spreadsheetdataName={spreadsheetName}
           spreadsheetColumns={columns}
-          spreadsheetRows = {rows}/>       
+          spreadsheetRows = {rows}
+          handleAddToPeopleDB={handleAddToPeopleDB}   />    
      )}
     </div>
 

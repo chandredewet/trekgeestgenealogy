@@ -2,27 +2,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../../lib/supabase"; // adjust path
 
-export default function SpreadsheetTable({ spreadsheetdataName, spreadsheetColumns, spreadsheetRows }) {
+export default function SpreadsheetTable({ spreadsheetdataName, spreadsheetColumns, spreadsheetRows,   handleAddToPeopleDB }) {
   
-  async function handleAddToPeopleDB(row) {
-    console.log("Adding row:", row);
-    console.log("Row ID:", row.spreadsheetRowID);
-    console.log("Object Keys", Object.keys(row));
-
-  const { data, error } = await supabase
-    .from("spreadsheet_row")
-    .update({
-      spreadsheet_row_processed: true
-    })
-    .eq(
-      "spreadsheet_row_id",
-      row.spreadsheetRowID
-    )
-    .select();
-
-  console.log("Updated row:", data);
-  console.log("Update error:", error);
-  }
+  
 
    return (
      <div className="flex flex-1 w-full max-w-none flex-col items-center dark:bg-black sm:items-start">
