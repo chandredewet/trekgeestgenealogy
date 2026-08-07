@@ -10,6 +10,46 @@ export default function SpreadsheetTable({ spreadsheetdataName, spreadsheetColum
      <div className="flex flex-1 w-full max-w-none flex-col items-center dark:bg-black sm:items-start">
         <h2 className="--font-inter text-3xl items-end py-5">{spreadsheetdataName}</h2>
         {/* TABLE */}
+        {/* PROCESS TRACKER */}
+    <div className="w-full mb-5">
+
+      <div className="flex justify-between mb-2">
+        <span>
+          Processed: {
+            spreadsheetRows.filter(
+              row => row.spreadsheetRowProcessed
+            ).length
+          } / {spreadsheetRows.length}
+        </span>
+
+        <span>
+          {
+            Math.round(
+              (spreadsheetRows.filter(
+                row => row.spreadsheetRowProcessed
+              ).length / spreadsheetRows.length) * 100
+            )
+          }%
+        </span>
+      </div>
+
+
+      <div className="h-3 bg-gray-200 rounded-full">
+        <div
+          className="h-3 bg-[#c06a4d] rounded-full"
+          style={{
+            width: `${
+              Math.round(
+                (spreadsheetRows.filter(
+                  row => row.spreadsheetRowProcessed
+                ).length / spreadsheetRows.length) * 100
+              )
+            }%`
+          }}
+        />
+      </div>
+
+    </div>
         {/* className="border px-3 py-2 rounded-md" */}
         <div className="w-full overflow-hidden border rounded-2xl shadow-sm">
         {/* <div className="w-full overflow-hidden border border-gray-200 rounded-2xl shadow-sm">           */}
@@ -62,7 +102,7 @@ export default function SpreadsheetTable({ spreadsheetdataName, spreadsheetColum
                           ${
                             row.spreadsheetRowProcessed
                               ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                              : "bg-gray-100 text-gray-400 cursor-not-allowed hover:bg-gray-200"
+                              : "bg-gray-100 text-gray-400 hover:bg-gray-200"
                           }
                         `}
                       >
