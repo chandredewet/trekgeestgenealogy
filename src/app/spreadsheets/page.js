@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabase";
 import SpreadsheetTable from "../components/SpreadsheetTable";
@@ -15,7 +14,6 @@ export default function SpreadsheetsPage() {
   const [hasSpreadsheetDataLoaded, setHasSpreadsheetDataLoaded] = useState(false);
   const [spreadsheetList, setSpreadsheetList] = useState([]);
   const [selectedSpreadsheetID, setSelectedSpreadsheetID] = useState("");
-  const [spreadsheetID, setSpreadsheetID] = useState("");
   const [mode, setMode] = useState("existing");
   const [showUploadPanel, setShowUploadPanel] = useState(false);
   const [newSpreadsheetName, setNewSpreadsheetName] = useState("");
@@ -61,9 +59,12 @@ export default function SpreadsheetsPage() {
 
     const mappedRows = data.map(r => ({
       ...r.spreadsheet_row_data,
-      spreadsheetdataID: r.spreadsheet_row_id,
-      spreadsheetdataProcessed: r.spreadsheet_row_processed
+      spreadsheetRowID: r.spreadsheet_row_id,
+      spreadsheetRowProcessed: r.spreadsheet_row_processed
     }));
+
+    console.log("Raw Supabase row:", data[0]);
+    console.log("Mapped row:", mappedRows[0]);
 
     setRows(mappedRows);
     
@@ -76,8 +77,8 @@ export default function SpreadsheetsPage() {
           : [];
 
       const SYSTEM_COLUMNS = [
-        "spreadsheetdataID",
-        "spreadsheetdataProcessed"
+        "spreadsheetRowID",
+        "spreadsheetRowProcessed"
       ];         
       
       setColumns( 
@@ -250,7 +251,7 @@ export default function SpreadsheetsPage() {
 
   async function toggleProcessed(id, current) {
       await supabase
-        .from("spreadsheetdata")
+        .from("spreadsheet_row")
         .update({ processed: !current })
         .eq("id", id);
   

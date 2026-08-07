@@ -4,6 +4,26 @@ import { supabase } from "../../../lib/supabase"; // adjust path
 
 export default function SpreadsheetTable({ spreadsheetdataName, spreadsheetColumns, spreadsheetRows }) {
   
+  async function handleAddToPeopleDB(row) {
+    console.log("Adding row:", row);
+    console.log("Row ID:", row.spreadsheetRowID);
+    console.log("Object Keys", Object.keys(row));
+
+  const { data, error } = await supabase
+    .from("spreadsheet_row")
+    .update({
+      spreadsheet_row_processed: true
+    })
+    .eq(
+      "spreadsheet_row_id",
+      row.spreadsheetRowID
+    )
+    .select();
+
+  console.log("Updated row:", data);
+  console.log("Update error:", error);
+  }
+
    return (
      <div className="flex flex-1 w-full max-w-none flex-col items-center dark:bg-black sm:items-start">
         <h2 className="--font-inter text-3xl items-end py-5">{spreadsheetdataName}</h2>
@@ -46,9 +66,10 @@ export default function SpreadsheetTable({ spreadsheetdataName, spreadsheetColum
                     {/* Processed */}
                     <td className="px-4 py-2 text-center ">
                       <button
-                        disabled
+                        onClick={() => handleAddToPeopleDB(row)}
+                        disabled={row.spreadsheetRowProcessed}
                         title={
-                          row.spreadsheetdataProcessed
+                          row.spreadsheetRowProcessed
                             ? "Already added to People Database"
                             : "Add to People Database"
                         }
@@ -57,18 +78,18 @@ export default function SpreadsheetTable({ spreadsheetdataName, spreadsheetColum
                           w-8 h-8 rounded-full border flex items-center justify-center
                           transition
                           ${
-                            row.spreadsheetdataProcessed
+                            row.spreadsheetRowProcessed
                               ? "bg-gray-300 text-gray-600 cursor-not-allowed"
                               : "bg-gray-100 text-gray-400 cursor-not-allowed hover:bg-gray-200"
                           }
                         `}
                       >
-                        {row.spreadsheetdataProcessed ? "✓" : "+"}
+                        {row.spreadsheetRowProcessed ? "✓" : "+"}
                       </button>
                     </td>
                     {/* SpreadSheetID */}
                     <td className="px-4 py-2 text-center ">
-                      {row.spreadsheetdataID}
+                      {row.spreadsheetRowID}
                     </td>
 
                     {/* Dynamic columns */}
