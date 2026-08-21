@@ -2,16 +2,26 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabase";
 import SpreadsheetTable from "../components/SpreadsheetTable";
+import PeopleDatabaseSetup from "../components/PeopleDatabaseSetup";
 import Loader from "../components/Loader";
 import Image from "next/image";
 import Link from "next/link";
 import Papa from "papaparse";
+
 
 export default function PeopleDatabasePage() {
   
   const [rows, setRows] = useState([]);
   const [columns, setColumns] = useState([]);
   const [hasSpreadsheetDataLoaded, setHasSpreadsheetDataLoaded] = useState(false);
+  const [peopleDatabaseList, setPeopleDatabaseList] = useState([]);
+
+  const [selectedPeopleDatabaseID, setSelectedPeopleDatabaseID] =
+    useState("");
+
+  const [hasPeopleDatabaseLoaded, setHasPeopleDatabaseLoaded] =
+    useState(false);
+
   const [spreadsheetList, setSpreadsheetList] = useState([]);
   const [selectedSpreadsheetID, setSelectedSpreadsheetID] = useState("");
   const [mode, setMode] = useState("existing");
@@ -24,70 +34,126 @@ export default function PeopleDatabasePage() {
   const spreadsheetName = selectedSpreadsheet?.spreadsheet_name ?? "";
   const [selectedFile, setSelectedFile] = useState(null);
 
-  const fetchSpreadsheet = async () => {
-      const { data, error } = await supabase
-        .from("spreadsheet")
-        .select("spreadsheet_id, spreadsheet_name");
+  const [availableColumns, setAvailableColumns] = useState([]);
+  const [selectedColumns, setSelectedColumns] = useState([]);
 
-      if (error) {
-        console.error("Spreadsheet fetch error:", error);
-        return;
-      }
-  
-      setSpreadsheetList(data || []);
+  const availableFields = [
+  "First Name",
+  "Surname",
+  "Birth Date",
+  "Baptism Date",
+  "Father",
+  "Mother",
+  "Witness",
+  "Minister",
+  "Page",
+  "Entry Number"
+  ];
 
-      // only set default if data exists
-      if (!selectedSpreadsheetID && data && data.length > 0) {
-             setSelectedSpreadsheetID(data[0].spreadsheet_id);
-      }
-  };
+  const [selectedFields, setSelectedFields] = useState([]);
 
-  const fetchSpreadsheetRow = async () => {
-
-    if (!selectedSpreadsheetID) return;
+  const fetchPeopleDatabases = async () => {
+    setHasPeopleDatabaseLoaded(false);
 
     const { data, error } = await supabase
-      .from("spreadsheet_row")
-      .select("*")
-      .eq("spreadsheet_id", selectedSpreadsheetID);
+      .from("people_database")
+      .select("*");
 
     if (error) {
-      console.error("Supabase error:", error);
-      setHasSpreadsheetDataLoaded(true);
+      console.error(
+        "People Database fetch error:",
+        error
+      );
+
+      setHasPeopleDatabaseLoaded(true);
       return;
     }
 
-    const mappedRows = data.map(r => ({
-      ...r.spreadsheet_row_data,
-      spreadsheetRowID: r.spreadsheet_row_id,
-      spreadsheetRowProcessed: r.spreadsheet_row_processed
-    }));
+    setPeopleDatabaseList(data || []);
 
-    console.log("Raw Supabase row:", data[0]);
-    console.log("Mapped row:", mappedRows[0]);
-
-    setRows(mappedRows);
-    
-    if (mappedRows.length > 0) {
-
-      // 🧠 Extract columns from your JSON
-      const cols =
-        data.length > 0 && data[0].spreadsheet_row_data
-          ? Object.keys(data[0].spreadsheet_row_data)
-          : [];
-
-      const SYSTEM_COLUMNS = [
-        "spreadsheetRowID",
-        "spreadsheetRowProcessed"
-      ];         
-      
-      setColumns( 
-        Object.keys(mappedRows[0]).filter(
-          col => !SYSTEM_COLUMNS.includes(col)
-        )
+    if (data && data.length > 0) {
+      setSelectedPeopleDatabaseID(
+        data[0].people_database_id
       );
-    };
-    setHasSpreadsheetDataLoaded(true);
+    }
+
+    setHasPeopleDatabaseLoaded(true);
+  };
+
+  const fetchSpreadsheet = async () => {
+
+      const fetchSpreadsheetColumns = async () => {
+      
+        if (!selectedSpreadsheetID) {
+          setAvailableColumns([]);
+          setSelectedColumns([]);
+          return;
+        }
+
+        const { data, error } = await supabase
+          .from("spreadsheet")
+          .select("spreadsheet_id, spreadsheet_name");
+
+        if (error) {
+          console.error("Spreadsheet fetch error:", error);
+          return;
+        }
+    
+        setSpreadsheetList(data || []);
+
+        // only set default if data exists
+        if (!selectedSpreadsheetID && data && data.length > 0) {
+              setSelectedSpreadsheetID(data[0].spreadsheet_id);
+        }
+      };
+  }
+
+  const fetchSpreadsheetRow = async () => {
+
+      if (!selectedSpreadsheetID) return;
+
+      const { data, error } = await supabase
+        .from("spreadsheet_row")
+        .select("*")
+        .eq("spreadsheet_id", selectedSpreadsheetID);
+
+      if (error) {
+        console.error("Supabase error:", error);
+        setHasSpreadsheetDataLoaded(true);
+        return;
+      }
+
+      const mappedRows = data.map(r => ({
+        ...r.spreadsheet_row_data,
+        spreadsheetRowID: r.spreadsheet_row_id,
+        spreadsheetRowProcessed: r.spreadsheet_row_processed
+      }));
+
+      console.log("Raw Supabase row:", data[0]);
+      console.log("Mapped row:", mappedRows[0]);
+
+      setRows(mappedRows);
+      
+      if (mappedRows.length > 0) {
+
+        // 🧠 Extract columns from your JSON
+        const cols =
+          data.length > 0 && data[0].spreadsheet_row_data
+            ? Object.keys(data[0].spreadsheet_row_data)
+            : [];
+
+        const SYSTEM_COLUMNS = [
+          "spreadsheetRowID",
+          "spreadsheetRowProcessed"
+        ];         
+        
+        setColumns( 
+          Object.keys(mappedRows[0]).filter(
+            col => !SYSTEM_COLUMNS.includes(col)
+          )
+        );
+      };
+      setHasSpreadsheetDataLoaded(true);
   };
 
   async function handleAddToPeopleDB(row) {
@@ -123,7 +189,7 @@ export default function PeopleDatabasePage() {
     const loadSpreadsheet = async () => {
       await fetchSpreadsheet();
     };
-
+    fetchPeopleDatabases();
     loadSpreadsheet();    
   }, []);
 
@@ -136,259 +202,68 @@ export default function PeopleDatabasePage() {
     };
 
     loadSpreadsheetRow();
- 
+
   }, [selectedSpreadsheetID]);
-
-  const handleFileUpload = (event) => {
-
-    const file = selectedFile;;
-
-    if (!file) {
-    console.log("No file selected");
-    return;
-    }
-
-    console.log("1️⃣ File selected:", file.name);
-
-
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-
-      complete: async (results) => {
-
-        console.log("2️⃣ CSV parsed");
-        console.log("Rows from CSV:", results.data.length);
-        console.log("First CSV row:", results.data[0]);
-
-        let spreadsheetIDToUse = selectedSpreadsheetID;
-
-
-        // =========================
-        // CREATE NEW SPREADSHEET
-        // =========================
-        if (mode === "new") {
-
-          console.log("3️⃣ Creating new spreadsheet");
-
-          if (!newSpreadsheetName.trim()) {
-            console.error("Please enter spreadsheet name");
-            return;
-          }
-
-          const { data: newSpreadsheet, error: spreadsheetError } =
-            await supabase
-              .from("spreadsheet")
-              .insert({
-                spreadsheet_name: newSpreadsheetName
-              })
-              .select()
-              .single();
-
-          if (spreadsheetError) {
-            console.error(
-              "Spreadsheet creation error:",
-              spreadsheetError
-            );
-
-            //setShowUploadPanel(false)
-            return;
-          }
-
-
-          spreadsheetIDToUse = newSpreadsheet.spreadsheet_id;
-          
-          console.log(
-          "4️⃣ New spreadsheet created:",
-          spreadsheetIDToUse
-          ) ;
-
-          // Update dropdown after creation
-          setSpreadsheetList(prev => [
-            ...prev,
-            newSpreadsheet
-          ]);
-
-
-          // Select the new spreadsheet
-          setSelectedSpreadsheetID(
-            newSpreadsheet.spreadsheet_id
-          );
-        }
-
-
-        // =========================
-        // INSERT CSV ROWS
-        // =========================
-
-        const formattedData = results.data.map((row) => ({
-          spreadsheet_id: spreadsheetIDToUse,
-          spreadsheet_row_data: row,
-          spreadsheet_row_processed: false
-        }));
-
-      try{
-
-        console.log(
-        "5️⃣ Data ready for spreadsheet_row:",
-        formattedData.length
-         );
-
-         console.log(
-        "Example row:",
-        formattedData[0]
-      );
-        console.log(formattedData);
-
-
-        const { data: insertedRows,error } = await supabase
-          .from("spreadsheet_row")
-          .insert(formattedData)
-          .select();
-
-        console.log("6️⃣ Insert finished");
-
-        if (error) {
-
-          console.error(
-            "Row insert error:",
-            error
-          );
-
-        } else {
-
-          console.log(
-            "CSV uploaded successfully" + insertedRows
-          );
-
-          setShowUploadPanel(false);
-          setSelectedFile(null);
-        }
-      } catch(err) {
-        console.error(
-            "🔥 Unexpected insert failure:",
-            err
-          );
-
-      }
-
-
-      },
-    });
-};
 
   async function toggleProcessed(id, current) {
       await supabase
         .from("spreadsheet_row")
         .update({ processed: !current })
         .eq("id", id);
-  
+
       // Refresh UI
       setRows(rows.map((r) => (r.id === id ? { ...r, processed: !current } : r)));
   }
 
   return (
+    <div className="p-6">
 
-  <div className="p-6">
-
-    {/* HEADER */}
-    <div className="flex items-start">
-      {/* LOGO */}
-      <div className="flex items-start">  
-               
-        <Link href="/">
-          <Image
-            src="/hatlogo.png"
-            alt="Trekgeest logo"
-            width={150}
-            height={150}
-            style={{ height: "auto" }}
-            className="object-contain -mr-6 -mt-4"
-            priority
-          />                     
-        </Link>   
-        <h1 className="--font-inter text-5xl">people database</h1>     
-      </div>    
-    </div> 
-      <div className="flex flex-col items-center ">
-          <h2 className="--font-inter text-3xl"> Set up new people database</h2>
-      </div>
-      <div className="flex items-start">   
-        <h3 className="--font-inter text-3 xl items-end px-5 py-5"> Select starter spreadsheet</h3>
-        {/* DROPDOWN (future-ready) */}
-        <div className="mb-4">
-          <select
-            value={selectedSpreadsheetID}
-            onChange={(e) => setSelectedSpreadsheetID(e.target.value)}
-            className="border px-3 py-2 rounded-md"
-          >
-            {spreadsheetList.map((sheet) => (
-              <option
-                key={sheet.spreadsheet_id}
-                value={sheet.spreadsheet_id}
-              >
-                {sheet.spreadsheet_name}
-              </option>
-            ))}
-          </select>
-        </div> 
-        <button
-                  onClick={() =>{ 
-                    setShowUploadPanel(false)
-                    setSelectedFile(null);
-                  }}
-                  className="bg-[#c06a4d] px-4 py-2 rounded-md"
-                >
-                  Add Spreadsheet
-                </button>    
-      
-         
+      {/* HEADER */}
+      <div className="flex items-start">
+        {/* LOGO */}
+        <div className="flex items-start">  
+                  
+          <Link href="/">
+            <Image
+              src="/hatlogo.png"
+              alt="Trekgeest logo"
+              width={150}
+              height={150}
+              style={{ height: "auto" }}
+              className="object-contain -mr-6 -mt-4"
+              priority
+            />                     
+          </Link>   
+          <h1 className="--font-inter text-5xl">people database</h1>     
+        </div>    
       </div> 
 
-      <div className="flex items-start">   
-        <h3 className="--font-inter text-3 xl items-end px-5 py-5"> Select Columns</h3>
-        {/* DROPDOWN (future-ready) */}
-        <div className="mb-4">
-          <select
-            value={selectedSpreadsheetID}
-            onChange={(e) => setSelectedSpreadsheetID(e.target.value)}
-            className="border px-3 py-2 rounded-md"
-          >
-            {spreadsheetList.map((sheet) => (
-              <option
-                key={sheet.spreadsheet_id}
-                value={sheet.spreadsheet_id}
-              >
-                {sheet.spreadsheet_name}
-              </option>
-            ))}
-          </select>
-        </div> 
-        <button
-                  onClick={() =>{ 
-                    setShowUploadPanel(false)
-                    setSelectedFile(null);
-                  }}
-                  className="bg-[#c06a4d] px-4 py-2 rounded-md"
-                >
-                  Add Spreadsheet
-                </button>    
       
-         
-      </div> 
+      {!hasPeopleDatabaseLoaded ? ( 
+        <div className="flex flex-col flex-1 items-center justify-center py-10 pl-10 pr-10  bg-white font-inter dark:bg-black">   
+        <Loader />
+        
+       </div>
+      ) : peopleDatabaseList.length === 0 ? (
+        <PeopleDatabaseSetup
+          onDatabaseCreated={fetchPeopleDatabases}
+        />
+      ) : (
+      // <PeopleDatabaseView />
 
-    {/* SPREADSHEET AREA */}
-    <div className="flex flex-col flex-1 items-center justify-center py-10 pl-10 pr-10  bg-white font-inter dark:bg-black">
-    {!hasSpreadsheetDataLoaded ? (    
-       <Loader />
-      ) : (                
-          <SpreadsheetTable spreadsheetdataName={spreadsheetName}
-          spreadsheetColumns={columns}
-          spreadsheetRows = {rows}
-          handleAddToPeopleDB={handleAddToPeopleDB}   />    
-     )}
-    </div>
+      // {/* SPREADSHEET AREA */}  
+                     
+      <SpreadsheetTable 
+      spreadsheetdataName={spreadsheetName}
+      spreadsheetColumns={columns}
+      spreadsheetRows = {rows}
+      handleAddToPeopleDB={handleAddToPeopleDB}   />  
 
-  </div>
+      
+      )}
+
+          
+     
+    </div>  
   );
 }
